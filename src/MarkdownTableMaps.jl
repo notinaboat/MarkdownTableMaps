@@ -3,7 +3,11 @@
 """
 module MarkdownTableMaps
 
+export md_table
 export md_table_map
+export md_table_cell
+export md_table_column
+export md_table_columns
 
 using Markdown
 using ReadmeDocs
@@ -58,8 +62,7 @@ Extract data from Markdown Tables in Doc Strings.
       "PROX_Z" => [2, 3]
 """
 function md_table_map(md, mapping)
-	md = Markdown.parse(IOBuffer(md); flavor = md_without_underscore_italic())
-	table = first(filter(x->x isa Markdown.Table, md.content))
+    table = md_table(md)
 	i, j = mapping
 	rows = filter(row->!isempty(row[i]), table.rows[2:end])
 	rows = map(row->join.(row, "\n"), rows)
@@ -70,5 +73,29 @@ function md_table_map(md, mapping)
 	end
 	[r[i] => j(r) for r in rows]
 end
+
+function md_table(md)
+	md = Markdown.parse(IOBuffer(md); flavor = md_without_underscore_italic())
+	first(filter(x->x isa Markdown.Table, md.content))
+end
+
+md_table_columns(md) = md_table_columns(md_table(md))
+md_table_columns(table::Markdown.Table) = join.(table.rows[1], "\n")
+
+md_table_column(md, n) = md_table_column(md_table(md), n)
+md_table_column(table::Markdown.Table, n) =
+    [join(table.rows[r][n], "\n") for r in 1:length(table.rows)]
+
+function md_table_column(md, s::String)
+    n = findfirst(isequal(s), md_table_columns(md))
+    md_table_column(md, n)
+end
+
+function md_table_cell(md, r::String, c::String)
+    col = md_table_column(md, c)
+    n = findfirst(isequal(r), md_table_column(md, 1))
+    col[n]
+end
+
 
 end # module
