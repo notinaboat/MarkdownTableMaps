@@ -1,0 +1,13 @@
+# This file is machine-generated - editing it directly is not advised
+
+[[Base64]]
+uuid = "2a0f44e3-6c83-55bd-87e4-b1978d98bd5f"
+
+[[Markdown]]
+deps = ["Base64"]
+uuid = "d6f4376e-aef5-505a-96c1-9c027394607a"
+
+[[ReadmeDocs]]
+git-tree-sha1 = "8119d6552b8888bbe5c0e65cf9bd4ea6055d9075"
+uuid = "c63066b3-de92-487d-9da7-7c375a07912b"
+version = "0.2.1"
