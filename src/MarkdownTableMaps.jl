@@ -8,6 +8,7 @@ export md_table_map
 export md_table_cell
 export md_table_column
 export md_table_columns
+export md_table_foreach_cell
 
 using Markdown
 using ReadmeDocs
@@ -64,13 +65,19 @@ Extract data from Markdown Tables in Doc Strings.
 function md_table_map(md, mapping)
     table = md_table(md)
 	i, j = mapping
-	rows = filter(row->!isempty(row[i]), table.rows[2:end])
-	rows = map(row->join.(row, "\n"), rows)
+    if i isa AbstractString
+        i = findfirst(isequal(i), md_table_columns(md))
+    end
+    if j isa AbstractString
+        j = findfirst(isequal(j), md_table_columns(md))
+    end
 	if j isa Integer
 		j = let _j = j
 			r -> r[_j]
 		end
 	end
+	rows = filter(row->!isempty(row[i]), table.rows[2:end])
+	rows = map(row->join.(row, "\n"), rows)
 	[r[i] => j(r) for r in rows]
 end
 
@@ -95,6 +102,16 @@ function md_table_cell(md, r::String, c::String)
     col = md_table_column(md, c)
     n = findfirst(isequal(r), md_table_column(md, 1))
     col[n]
+end
+
+function md_table_foreach_cell(f, md)
+    for column_name in md_table_columns(md)[2:end]
+        for (row_name, cell) in md_table_map(md, 1 => column_name)
+            if cell != ""
+                f(column_name, row_name, cell)
+            end
+        end
+    end
 end
 
 
